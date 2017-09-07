@@ -1,0 +1,7 @@
+This is the info for the last game you ran.
+
+File: Adult Manga 1 (PD).smc Header: Yes
+                          TYPE:NORMAL   
+INTERLEAVED:No               CHKSUM:FAIL
+VIDEO:NTSC    BANK:Lo     CRC32:8A31F646
+BAD ROM                                 
