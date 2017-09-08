@@ -17,18 +17,23 @@ help = '''Entre com um emulador suportado:
 	    ePSXe (Android)
 	'''
 
-print help
+print '\n' + help
 
 dir = os.getcwd()
 
 server = 'https://www.loveroms.com/'
-emulador = raw_input('Digite o nome do emulador que deseja jogar: ')
 
+emulador = raw_input('\nDigite o nome do emulador que deseja jogar: ')
+    
 Snes9x = dir + '/emuladores/SNES9x/snes9x.exe'
 zsnesw = dir + '/emuladores/zsnesw/zsnesw.exe'
 Snes9K = dir + '/emuladores/snes9k009z/Snes9K.exe'
 
-if emulador == 'Snes9x EX+ (Android)':
+if emulador == '':
+    print '\nEmulador não definido,para prosseguir defina um emulador'
+    sys.exit()
+
+elif emulador == 'Snes9x EX+ (Android)':
     emulator = 'super-nintendo'
 
 elif emulador == 'SuperRetro16 (Android)':
@@ -52,6 +57,10 @@ elif emulador == 'PPSSPP (Android)':
 elif emulador == 'ePSXe (Android)':
     emulator = 'playstation'
 
+else:
+    print '\nEmulador não reconhecido,para prosseguir defina um emulador válido!!!'
+    sys.exit()	
+    
 def get_html(url):
 	req = urllib2.Request(url)
 	#req.add_header('referer', server)
@@ -63,7 +72,7 @@ def get_html(url):
 	return html
 
 def browser(link,dest,dp):
-    print '========================================================='; print 'Efetuando download em : ' + dir; print '========================================================='
+    print '\n'; print '========================================================='; print 'Efetuando download em : ' + dir; print '========================================================='
     time.sleep(1)	
     br = mechanize.Browser()
     time.sleep(1)
@@ -150,7 +159,7 @@ def play_game(url):
         link = subprocess.call([zsnesw, '-f', '%s' % rom]) == 0
 
 def progress(seconds):
-    print 'Loading....  ',
+    print '\nLoading....  ',
     sys.stdout.flush() 
     i = 0 
     while i <= seconds:
@@ -167,8 +176,9 @@ def progress(seconds):
         i+=1
     #print '\b\b done!'
 
-def start():
-    codigo_fonte = get_html(server + 'download-amp/super-nintendo/super-mario-world-u-/12720')
+def load_start():
+    url = raw_input('\nCopie e cole aqui o link do jogo: ')    
+    codigo_fonte = get_html(server + 'download-amp/' + url)
     match = re.compile(r'<a class=".*?" href="(.*?)"><i class=".*?"></i>.*?</a>').findall(codigo_fonte)
     for i in match:
         link = i.encode('utf-8')
@@ -176,12 +186,46 @@ def start():
         #print ntpath.basename(urllib.unquote(link))
         rom_name = ntpath.basename(urllib.unquote(link))		
         lib = os.path.join(dir,rom_name)		
-        download(link,lib)
-        print '================================================'; print 'Extraindo em : ' + dir; print '================================================'		
+        download(link,lib)		
+        print '\n'; print '================================================'; print 'Extraindo em : ' + dir; print '================================================'		
         all(lib,dir)
         progress(10)
         print 'Extraido com sucesso !!!'
-        play_game(lib)		
+        play_game(lib)
+
+def list_roms():
+    print '\nJogos de A-Z'
+    time.sleep(2)
+    letter = raw_input('Digite uma letra de A-Z: ')
+    codigo_fonte = get_html(server + 'roms/' + emulator + '/?letter=' + letter.upper())
+    match = re.compile(r'<a href=".*?/download/(.*?)"><span class=".*?"></span> <span>(.*?)</span>').findall(codigo_fonte)
+    for i, e in match:
+        title = e.encode('utf-8')
+        print '\nTITULO: ' + title	
+        link = i.encode('utf-8')
+        print 'LINK: ' + link
+    load_start()		
+
+def query_rom():
+    name_rom = raw_input('\nDigite o nome do jogo: ')
+    codigo_fonte = get_html(server + 'roms/' + emulator + '/?q=' + urllib.quote(name_rom))
+    match = re.compile(r'<a href=".*?/download/(.*?)"><span class=".*?"></span> <span>(.*?)</span>').findall(codigo_fonte)
+    for i, e in match:
+        title = e.encode('utf-8')
+        print '\nTITULO: ' + title	
+        link = i.encode('utf-8')
+        print 'LINK: ' + link
+    load_start()		
 
 if __name__ == '__main__':
-    start()
+    action = raw_input('\nDigite 1 para buscar jogos de A-Z ou 2 para buscar um jogo pelo nome: ')
+    if action == '1':
+        list_roms()
+    elif action == '2':		
+        query_rom()
+    elif action == 'sair' or action == 'Sair' or action == 'SAIR':	
+        print '\nSaindo...'
+        time.sleep(2)		
+        sys.exit(0)        		
+    else:
+        print 'Comando inválido,tente novamente!!!'		
