@@ -211,15 +211,15 @@ def play_game(lib,emulador):
         link = subprocess.call([Gens, '%s' % rom]) == 0
         sys.exit(0)
     elif emulador == 'Genesis':
-        retroarch_core = 'C:\\Users\\cleit\\Desktop\\GamesRetro\\emuladores\\RetroArch\\cores\\genesis_plus_gx_libretro.dll'	
+        retroarch_core =  dir + '/emuladores/RetroArch/cores/genesis_plus_gx_libretro.dll'	
         link = subprocess.call([retroarch, '-f', '-D', '-L', retroarch_core, '%s' % rom])
         sys.exit(0)
     elif emulador == 'snes9x2010':
-        retroarch_core = 'C:\\Users\\cleit\\Desktop\\GamesRetro\\emuladores\\RetroArch\\cores\\snes9x2010_libretro.dll'	
+        retroarch_core =  dir + '/emuladores/RetroArch/cores/snes9x2010_libretro.dll'	
         link = subprocess.call([retroarch, '-f', '-D', '-L', retroarch_core, '%s' % rom])
         sys.exit(0)
     elif emulador == 'ppsspp':
-        retroarch_core = 'C:\\Users\\cleit\\Desktop\\GamesRetro\\emuladores\\RetroArch\\cores\\ppsspp_libretro.dll'	
+        retroarch_core =  dir + '/emuladores/RetroArch/cores/ppsspp_libretro.dll'	
         link = subprocess.call([retroarch, '-f', '-D', '-L', retroarch_core, '%s' % rom])
         sys.exit(0)		
     else:
