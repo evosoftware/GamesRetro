@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import os,sys,re,requests,urllib,urllib2,mechanize,time,ntpath,zipfile,gzip,cookielib,subprocess
+import os,sys,re,urllib,urllib2,mechanize,time,ntpath,zipfile,gzip,cookielib,subprocess
 
 help = '''
         Entre com um emulador suportado:
@@ -111,13 +111,13 @@ def set_emulador(emulador):
     
 def get_html(url):
 	req = urllib2.Request(url)
-	req.add_header('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')	
+	req.add_header('Referer', server)	
 	response = urllib2.urlopen(req)
 	html = response.read()
 	response.close()
 	return html
 
-def browser(link,dest,dp):
+def browser(link,dest,url_rom):
     print '\n'; print '========================================================='; print 'Efetuando download em : ' + dir; print '========================================================='
     time.sleep(1)	
     br = mechanize.Browser()
@@ -130,17 +130,17 @@ def browser(link,dest,dp):
     br.set_handle_referer(True)	
     br.set_handle_robots(False)
     br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
-    br.addheaders = [('User-agent', 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'),('Referer', server)]
-    f = br.retrieve(link,dest)
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'),('Referer', url_rom)]
+    br.retrieve(link,dest)
     progress(10)	
     print 'Download realizado com sucesso !!!'	
 	
-def download(url,dest,dp=None):
+def download(url,dest,url_rom,dp=None):
     if not dp:
-    	dp = 'GamesRetro,Downloading & Copying File'
+    	dp = 'GamesRetro,Baixando e copiando arquivos...'
     time.sleep(2)
     #urllib.urlretrieve(url,dest,lambda nb, bs, fs, url=url: _pbhook(nb,bs,fs,url,dp))
-    browser(url,dest,dp)	
+    browser(url,dest,url_rom)	
 	
 def _pbhook(numblocks,blocksize,filesize,url,dp):
     try:
@@ -160,6 +160,10 @@ def allNoProgress(_in,_out):
 	    zin=zipfile.ZipFile(_in,'r'); zin.extractall(_out)
     except Exception, e:
 	    print str(e); return False
+	    if e:
+	        print 'Arquivo corrompido,impossível extrair rom,voltando ao menu pincipal...'
+	        time.sleep(2)
+	        start()			
     return True
 	
 def allWithProgress(_in,_out,dp):
@@ -245,13 +249,22 @@ def progress(seconds):
 
 def load_start(emulador):
     url = raw_input('\nCopie e cole aqui o link do jogo: ')    
-    codigo_fonte = get_html(server + 'download-amp/' + url)
-    match = re.compile(r'<a class=".*?" href="(.*?)"><i class=".*?"></i>.*?</a>').findall(codigo_fonte)
+    #codigo_fonte = get_html(server + 'download-amp/' + url)
+    url_rom = (server + 'download/' + url + '#captcha')
+    print url_rom
+    codigo_fonte = get_html(server + 'download/' + url + '#captcha')	
+    #match = re.compile(r'<a class=".*?" href="(.*?)"><i class=".*?"></i>.*?</a>').findall(codigo_fonte)
+    #match = re.compile(r"var url = '(.*?)';").findall(codigo_fonte)
+    match = re.compile(r'<small>.*? <a href="(.*?)">Click here</a>.*?</small>').findall(codigo_fonte)
     for i in match:
         link = i.encode('utf-8')
-        rom_name = ntpath.basename(urllib.unquote(link))		
+        print link
+        a = link.split('?id=')
+        b = a[0]
+        #print b		
+        rom_name = ntpath.basename(urllib.unquote(b))		
         lib = os.path.join(dir,rom_name)		
-        download(link,lib)		
+        download(link,lib,url_rom)		
         print '\n'; print '================================================'; print 'Extraindo em : ' + dir; print '================================================'		
         all(lib,dir)
         progress(10)
@@ -277,7 +290,7 @@ def list_roms(emulator,emulador):
         pass
         question = raw_input('\nBuscar por jogos novamente, Y ou N ??? ')
         if question.upper() == 'Y':
-            #query_rom(emulator,emulador)
+            query_rom(emulator,emulador)
             start()			
         if question.upper() == 'N':
             start()
@@ -285,11 +298,12 @@ def list_roms(emulator,emulador):
             print 'Comando inválido,tente novamente!!!'
             print '\nSaindo...'
             sys.exit()			
-    #query_rom(emulator,emulador)		
+    query_rom(emulator,emulador)		
 
 def query_rom(emulator,emulador):
     try:
-        name_rom = raw_input('\nDigite o nome do jogo: ') 		
+        name_rom = raw_input('\nDigite o nome do jogo: ')
+        #print(server + 'roms/' + emulator + '/?q=' + urllib.quote(name_rom))
         codigo_fonte = get_html(server + 'roms/' + emulator + '/?q=' + urllib.quote(name_rom))
         match = re.compile(r'<a href=".*?/download/(.*?)"><span class=".*?"></span> <span>(.*?)</span>').findall(codigo_fonte)			
         for i, e in match:
