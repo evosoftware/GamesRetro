@@ -130,7 +130,7 @@ def browser(link,dest,url_rom):
     br.set_handle_referer(True)	
     br.set_handle_robots(False)
     br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
-    br.addheaders = [('User-agent', 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'),('Referer', url_rom)]
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'),('Referer', url_rom)]
     br.retrieve(link,dest)
     progress(10)	
     print 'Download realizado com sucesso !!!'	
@@ -159,9 +159,9 @@ def allNoProgress(_in,_out):
     try:
 	    zin=zipfile.ZipFile(_in,'r'); zin.extractall(_out)
     except Exception, e:
-	    print str(e); return False
+	    #print str(e); return False
 	    if e:
-	        print 'Arquivo corrompido,impossível extrair rom,voltando ao menu pincipal...'
+	        print '\nArquivo corrompido,impossível extrair rom,voltando ao menu pincipal...'
 	        time.sleep(2)
 	        start()			
     return True
@@ -248,14 +248,15 @@ def progress(seconds):
         i+=1
 
 def load_start(emulador):
-    url = raw_input('\nCopie e cole aqui o link do jogo: ')    
-    #codigo_fonte = get_html(server + 'download-amp/' + url)
-    url_rom = (server + 'download/' + url + '#captcha')
+    url = raw_input('\nCopie e cole aqui o link do jogo: ')
+    #url_rom = (server + 'download/' + url + '#captcha')
+    url_rom = (server + 'download-amp/' + url)	
     print url_rom
-    codigo_fonte = get_html(server + 'download/' + url + '#captcha')	
-    #match = re.compile(r'<a class=".*?" href="(.*?)"><i class=".*?"></i>.*?</a>').findall(codigo_fonte)
+    codigo_fonte = get_html(server + 'download-amp/' + url)	
+    #codigo_fonte = get_html(server + 'download/' + url + '#captcha')	
+    match = re.compile(r'<a class=".*?" href="(.*?)"><i class=".*?"></i>.*?</a>').findall(codigo_fonte)
     #match = re.compile(r"var url = '(.*?)';").findall(codigo_fonte)
-    match = re.compile(r'<small>.*? <a href="(.*?)">Click here</a>.*?</small>').findall(codigo_fonte)
+    #match = re.compile(r'<small>.*? <a href="(.*?)">Click here</a>.*?</small>').findall(codigo_fonte)
     for i in match:
         link = i.encode('utf-8')
         print link
@@ -298,7 +299,7 @@ def list_roms(emulator,emulador):
             print 'Comando inválido,tente novamente!!!'
             print '\nSaindo...'
             sys.exit()			
-    query_rom(emulator,emulador)		
+    #query_rom(emulator,emulador)		
 
 def query_rom(emulator,emulador):
     try:
